@@ -6,9 +6,10 @@ authors = [
     {name = "VaDKo61",email = "vadkoo@mail.ru"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
-    "pywin32 (>=311,<312)"
+    "pywin32 (>=311,<312)",
+    "pyside6 (>=6.9.2,<7.0.0)"
 ]
 
 [tool.poetry]
