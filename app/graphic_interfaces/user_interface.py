@@ -2,10 +2,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout,
-    QPushButton, QLabel, QStatusBar, QMenuBar, QMenu, QMessageBox
+    QPushButton, QStatusBar, QMenuBar, QMenu, QMessageBox
 )
-# from dialogs import get_inputs
-# from logic import process_result
+
+from .dialogs import get_inputs_create_project
 
 
 class MainWindow(QMainWindow):
@@ -20,13 +20,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
-        self.button = QPushButton('Запустить ввод')
-        self.result_label = QLabel('Результат будет здесь')
-        self.result_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        self.button_create_project = QPushButton('Создать новый проект')
 
         layout = QVBoxLayout()
-        layout.addWidget(self.button)
-        layout.addWidget(self.result_label)
+        layout.addWidget(self.button_create_project, alignment=Qt.AlignTop)
         central_widget.setLayout(layout)
 
         # Статус-бар
@@ -53,22 +50,28 @@ class MainWindow(QMainWindow):
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
 
-        # === Сигналы ===
-    #     self.button.clicked.connect(self.handle_button_click)
-    #
-    # def handle_button_click(self):
-    #     result = get_inputs()
-    #     if result:
-    #         number, text = result
-    #         result_text = process_result(number, text)
-    #         self.result_label.setText(result_text)
-    #         self.statusBar().showMessage('Ввод успешно выполнен', 3000)
-    #
+        # Сигналы
+        self.button_create_project.clicked.connect(self.handle_button_create_project)
+
+    def handle_button_create_project(self):
+        result = get_inputs_create_project()
+        if result:
+            number, title = result
+            # result_text = process_result(number, text)
+            # self.result_label.setText(result_text)
+            # self.statusBar().showMessage('Ввод успешно выполнен', 3000)
+        else:
+            QMessageBox.warning(
+                self,
+                "Внимание",
+                "Данные не были введены. Пожалуйста, заполните поля."
+            )
+
     def show_about(self):
         QMessageBox.information(
             self,
             "О программе",
-            "Приложение для конструктора Водокомфорт\n\n"
+            "Приложение для конструктора Мегатрон\n\n"
             "Помощник конструктора\n"
             "(c) Вадим Морозов"
         )
