@@ -7,7 +7,7 @@ from graphic_interfaces import MainWindow
 
 def main():
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon("icons/app_icon.png"))
+    app.setWindowIcon(QIcon('graphic_interfaces/icons/Megatron.PNG'))
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
