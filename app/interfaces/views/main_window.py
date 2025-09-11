@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QStatusBar, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QStatusBar, QMessageBox
 from PySide6.QtCore import Qt
 
 from resources import strings as s
