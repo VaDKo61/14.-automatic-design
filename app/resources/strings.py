@@ -14,6 +14,7 @@ ACTION_ABOUT = 'О программе'
 
 # Кнопки
 BTN_CREATE_PROJECT = 'Создать новый проект'
+BTN_VERIFICATION_PROJECT = 'Проверить сборку с СП'
 
 # Сообщения
 MSG_CREATE_PROJECT = 'Проект успешно создан'
