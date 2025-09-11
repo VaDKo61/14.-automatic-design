@@ -1,6 +1,9 @@
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QStatusBar, QMessageBox
 from PySide6.QtCore import Qt
+
 from resources import strings as s
+
+from .buttons_panel import ButtonsPanel
 
 
 class MainWindow(QMainWindow):
@@ -16,10 +19,16 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
-        self.button_create_project = QPushButton(s.BTN_CREATE_PROJECT)
+        self.buttons_panel = ButtonsPanel()
+
+        self.button_create_project = self.buttons_panel.add_button(s.BTN_CREATE_PROJECT)
+        self.button_verification_project = self.buttons_panel.add_button(s.BTN_VERIFICATION_PROJECT)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.button_create_project, alignment=Qt.AlignTop)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.addStretch()
+        layout.addWidget(self.buttons_panel, alignment=Qt.AlignCenter)
+        layout.addStretch()
         central_widget.setLayout(layout)
 
         self.setStatusBar(QStatusBar())
