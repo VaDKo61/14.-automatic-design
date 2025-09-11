@@ -7,7 +7,7 @@ def create_structure(project_number: str) -> Path | None:
     path: Path = Path(BASE_PATH) / project_number
     if path.exists():
         return None
-    path.mkdir(parents=True)
+    path.mkdir()
 
     folder: tuple = ('ИД',
                      r'КД/УВУ/Проверка',
