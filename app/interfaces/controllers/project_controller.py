@@ -20,3 +20,7 @@ def create_project_handle(main_window) -> None:
         return None
 
     show_success_with_link(main_window, path)
+
+
+def paste_template_routing(main_window):
+    pass
