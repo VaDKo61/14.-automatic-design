@@ -12,7 +12,7 @@ class ButtonsPanel(QWidget):
         self.layout.setContentsMargins(20, 20, 20, 20)
         self.setLayout(self.layout)
 
-    def add_button(self, text: str, width: int = 220, height: int = 50) -> QPushButton:
+    def add_button(self, text: str, width: int = 320, height: int = 50) -> QPushButton:
         button = QPushButton(text)
         button.setStyleSheet(BUTTON_STYLE)
         button.setFixedSize(width, height)
