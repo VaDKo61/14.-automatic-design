@@ -12,11 +12,13 @@ TEMPLATE_FILES: list[Path] = [
 
 def create_structure(project_number: str) -> Path | None:
     if not project_number or not project_number.isdigit():
-        raise InvalidProjectNumberError()
+        raise InvalidProjectNumberError('Данные не были введены или введены некорректно. '
+                                        'Пожалуйста, заполните поля.')
 
     path: Path = Path(BASE_PATH) / project_number
     if path.exists():
-        raise ProjectExistsError()
+        raise ProjectExistsError('Проект с таким номером уже существует. '
+                                 'Пожалуйста, введите другой номер.')
 
     path.mkdir()
 
@@ -44,5 +46,3 @@ def create_structure(project_number: str) -> Path | None:
                     shutil.copy(template_file, folder_path / template_file.name)
 
     return path
-
-
