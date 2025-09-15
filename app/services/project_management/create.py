@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+from .errors import InvalidProjectNumberError, ProjectExistsError
 
 BASE_PATH: str = r'D:\Solid Works\Проекты SW'
 TEMPLATES_PATH: str = r'C:\SWR-Библиотеки 2021\Мое\Справка\Для проги'
@@ -10,9 +11,13 @@ TEMPLATE_FILES: list[Path] = [
 
 
 def create_structure(project_number: str) -> Path | None:
+    if not project_number or not project_number.isdigit():
+        raise InvalidProjectNumberError()
+
     path: Path = Path(BASE_PATH) / project_number
     if path.exists():
-        return None
+        raise ProjectExistsError()
+
     path.mkdir()
 
     subfolders: tuple = (
@@ -39,3 +44,5 @@ def create_structure(project_number: str) -> Path | None:
                     shutil.copy(template_file, folder_path / template_file.name)
 
     return path
+
+
