@@ -19,4 +19,3 @@ BTN_PASTE_TEMPLATE_ROUTING = 'Вставить в сборку шаблон тр
 
 # Сообщения
 MSG_INPUT_WARNING_TITLE = 'Внимание'
-

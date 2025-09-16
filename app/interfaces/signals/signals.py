@@ -1,4 +1,4 @@
-from interfaces.controllers import create_project_handle, get_list_files_for_ui
+from interfaces.controllers import create_project_handle
 from interfaces.views.dialogs import show_file_buttons_dialog
 
 
