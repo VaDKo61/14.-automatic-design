@@ -1,4 +1,5 @@
-from interfaces.controllers import create_project_handle, paste_template_routing
+from interfaces.controllers import create_project_handle, get_list_files_for_ui
+from interfaces.views.dialogs import show_file_buttons_dialog
 
 
 def setup_signals(main_window):
@@ -7,5 +8,5 @@ def setup_signals(main_window):
     )
 
     main_window.button_paste_template_routing.clicked.connect(
-        lambda: paste_template_routing(main_window)
+        lambda: show_file_buttons_dialog(main_window)
     )

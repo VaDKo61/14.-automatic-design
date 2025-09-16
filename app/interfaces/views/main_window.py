@@ -1,9 +1,11 @@
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QStatusBar, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QStatusBar
 from PySide6.QtCore import Qt
 
 from resources import strings as s
 
+from .messages import show_info
 from .buttons_panel import ButtonsPanel
+from .dialogs import show_file_buttons_dialog
 
 
 class MainWindow(QMainWindow):
@@ -35,4 +37,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(QStatusBar())
 
     def show_about(self):
-        QMessageBox.information(self, s.APP_ABOUT_TITLE, s.APP_ABOUT_TEXT)
+        show_info(self, s.APP_ABOUT_TITLE, s.APP_ABOUT_TEXT)
+
+    def show_file_buttons_dialog(self):
+        show_file_buttons_dialog(self)

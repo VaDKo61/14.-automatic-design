@@ -1,6 +1,6 @@
-from interfaces import ask_project_number
 from services import create_structure, InvalidProjectNumberError, ProjectExistsError
-from interfaces.views import show_success_with_link, show_warning, show_error
+from interfaces.views.messages import show_success_with_link, show_warning, show_error
+from interfaces.views.inputs import ask_project_number
 
 
 def create_project_handle(main_window) -> None:
@@ -18,7 +18,3 @@ def create_project_handle(main_window) -> None:
         show_warning(main_window, str(e))
     except Exception as e:
         show_error(main_window, 'Критическая ошибка', str(e))
-
-
-def paste_template_routing(main_window):
-    pass
