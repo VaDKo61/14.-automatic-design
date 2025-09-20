@@ -1,5 +1,5 @@
 from interfaces.controllers import create_project_handle
-from interfaces.views.dialogs import show_file_buttons_dialog
+from interfaces.views.dialogs import show_file_routing_buttons_dialog
 
 
 def setup_signals(main_window):
@@ -8,5 +8,5 @@ def setup_signals(main_window):
     )
 
     main_window.button_paste_template_routing.clicked.connect(
-        lambda: show_file_buttons_dialog(main_window)
+        lambda: show_file_routing_buttons_dialog(main_window)
     )

@@ -5,7 +5,7 @@ from resources import strings as s
 
 from .messages import show_info
 from .buttons_panel import ButtonsPanel
-from .dialogs import show_file_buttons_dialog
+from .dialogs import show_file_routing_buttons_dialog
 
 
 class MainWindow(QMainWindow):
@@ -40,4 +40,4 @@ class MainWindow(QMainWindow):
         show_info(self, s.APP_ABOUT_TITLE, s.APP_ABOUT_TEXT)
 
     def show_file_buttons_dialog(self):
-        show_file_buttons_dialog(self)
+        show_file_routing_buttons_dialog(self)
