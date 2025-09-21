@@ -1,4 +1,5 @@
 import re
+import shutil
 
 from pathlib import Path
 
@@ -35,7 +36,8 @@ def get_last_routing() -> dict[str, tuple[int, str]]:
             number: int = int(name_split[-1][-3::])
 
             if last_routing.get(name, (0, ''))[0] < number:
-                last_routing[name] = (int(number), component.Name2.split('-')[0])
+                last_routing[name] = (int(number), component.Name2)
+
     return last_routing
 
 
@@ -47,4 +49,4 @@ def copy_template(selected_file: str, assem_dir: str, new_name_template: str) ->
     if new_file.exists():
         raise FileExistsError(f'Файл {new_name_template} уже существует, копирование пропущено')
 
-    old_file.rename(new_file)
+    shutil.copy2(old_file, new_file)

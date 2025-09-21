@@ -1,10 +1,10 @@
 from services import create_structure, InvalidProjectNumberError, ProjectExistsError
 from interfaces.views.messages import show_success_with_link, show_warning, show_error
-from interfaces.views.inputs import ask_project_number
+from interfaces.views.inputs import ask_input_text
 
 
 def create_project_handle(main_window) -> None:
-    project_number, ok = ask_project_number()
+    project_number, ok = ask_input_text('Введите номер заказа:')
 
     if not ok:
         return None

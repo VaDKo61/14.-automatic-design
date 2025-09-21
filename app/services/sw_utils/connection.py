@@ -21,3 +21,10 @@ def get_sw_app_and_model():
 def assembly_verification(sw_model) -> None:
     if sw_model.GetType != 2:
         raise SwAssemblyError
+
+
+def create_com(value, *args):
+    if len(args) == 2:
+        return win32com.client.VARIANT(args[0] | args[1], value)
+    else:
+        return win32com.client.VARIANT(args[0], value)
