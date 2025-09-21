@@ -1,6 +1,6 @@
 from services import create_structure, InvalidProjectNumberError, ProjectExistsError
 from interfaces.views.messages import show_success_with_link, show_warning, show_error
-from interfaces.views.inputs import ask_input_text
+from interfaces.views.dialogs.inputs import ask_input_text
 
 
 def create_project_handle(main_window) -> None:

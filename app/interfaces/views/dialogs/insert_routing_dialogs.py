@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QDialog, QVBoxLayout, QScrollArea, QWidget, QPushB
 
 from interfaces.controllers import get_list_files_for_ui, get_current_routing_for_ui, insert_template_routing_handle
 
-from .messages import show_warning
+from interfaces.views.messages import show_warning
 from .inputs import ask_input_text
 
 
