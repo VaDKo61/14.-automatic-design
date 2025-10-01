@@ -68,6 +68,8 @@ def show_file_routing_buttons_dialog(main_window) -> None:
     current_routing: dict[str, tuple[int, str]] = {}
     if dialog_files.exec() == QDialog.Accepted and dialog_files.selected_buttons:
         current_routing = get_current_routing_for_ui(main_window)
+    else:
+        return
 
     dialog_routing = ListButtonsDialog(
         sorted(list(current_routing.keys())),
@@ -89,3 +91,5 @@ def show_file_routing_buttons_dialog(main_window) -> None:
                 dialog_files.selected_buttons,
                 selected_buttons
             )
+    else:
+        return

@@ -16,3 +16,7 @@ class SwModelError(SwError):
 
 class SwAssemblyError(SwError):
     """Активна не сборка"""
+
+
+class SwTableError(SwError):
+    """Спецификация не создана"""

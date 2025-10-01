@@ -46,6 +46,7 @@ def create_structure(project_number: str) -> Path | None:
         if folder in target_folders:
             for template_file in TEMPLATE_FILES:
                 if template_file.exists():
-                    shutil.copy(template_file, folder_path / template_file.name)
+                    shutil.copy(template_file, folder_path /
+                                (template_file.stem + f' {project_number}' + template_file.suffix))
 
     return path
