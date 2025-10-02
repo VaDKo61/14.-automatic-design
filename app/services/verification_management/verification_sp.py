@@ -1,6 +1,6 @@
 from services.sw_utils import SwError
 from .project import get_dir_project, get_number_project
-from .sp import get_dir_sp, save_sp_assem, save_verification_excel
+from .sp import get_dir_sp, save_sp_assem, create_verification_excel
 
 
 def verification_sp():
@@ -20,4 +20,4 @@ def verification_sp():
     except SwError as e:
         raise SwError
 
-    save_verification_excel(dir_sp, dir_sp_assem)
+    create_verification_excel(dir_sp, dir_sp_assem)

@@ -2,7 +2,6 @@ from pathlib import Path
 
 from openpyxl.reader.excel import load_workbook
 from openpyxl.workbook import Workbook
-from rapidfuzz import fuzz
 
 from services.sw_utils.errors import SwTableError
 
@@ -38,26 +37,26 @@ def save_sp_assem(sw_assem, dir_sp: str, number_project: str) -> str | None:
     return str(dir_sp_assem)
 
 
-def verification_excel(
-        ws_sp,
-        ws_sp_assem
-) -> tuple[list[tuple], list[tuple], list[tuple], list[tuple], list[tuple]]:
-    values_sp: list[tuple] = [row for row in get_cell(ws_sp, min_col=1, max_col=5, min_row=3, values_only=True)]
-    values_sp_assem: list[tuple] = [row for row in get_cell(ws_sp_assem, min_row=2, values_only=True)]
+def verification_excel(ws_sp, ws_sp_assem) -> list[tuple]:
+    sp1: list[tuple] = [row for row in get_cell(ws_sp, min_col=1, max_col=5, min_row=3, values_only=True)]
+    sp2: list[tuple] = [row for row in get_cell(ws_sp_assem, min_row=2, values_only=True)]
 
-    exact_matches, values_sp_rest, values_sp_assem_rest = get_exact_matches(values_sp, values_sp_assem)
+    exact_matches, sp1, sp2 = get_exact_matches(sp1, sp2)
 
-    fuzzy_matches, values_sp_rest, values_sp_assem_rest = get_fuzzy_matches(values_sp_rest, values_sp_assem_rest)
+    fuzzy_matches, sp1, sp2 = get_fuzzy_matches(sp1, sp2)
 
-    matches_70, values_sp_rest, values_sp_assem_rest = match_items(values_sp_rest, values_sp_assem_rest, 70)
-    matches_60, values_sp_rest, values_sp_assem_rest = match_items(values_sp_rest, values_sp_assem_rest, 60)
-    matches_50, values_sp_rest, values_sp_assem_rest = match_items(values_sp_rest, values_sp_assem_rest, 50)
-    last_matches: list[tuple] = [*matches_70, *matches_60, *matches_50]
+    thresholds: list[int] = [70, 60, 50, 40, 30]
+    last_matches: list[tuple] = []
+    for t in thresholds:
+        matches, sp1, sp2 = match_items(sp1, sp2, t)
+        last_matches.extend(matches)
 
-    return exact_matches, fuzzy_matches, last_matches, values_sp_rest, values_sp_assem_rest
+    last = zip_last(sp1, sp2)
+
+    return [*exact_matches, ('-',), *fuzzy_matches, ('-',), *last_matches, ('-',), *last]
 
 
-def save_verification_excel(dir_sp: str, dir_sp_assem: str):
+def create_verification_excel(dir_sp: str, dir_sp_assem: str):
     # wb_sp = load_workbook(dir_sp)
     # ws_sp = wb_sp.active
     #
@@ -70,32 +69,13 @@ def save_verification_excel(dir_sp: str, dir_sp_assem: str):
     wb_sp_assem = load_workbook(r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902_SW.xlsx')
     ws_sp_assem = wb_sp_assem.active
 
-    (
-        exact_matches,
-        fuzzy_matches,
-        last_matches,
-        values_sp_rest,
-        values_sp_assem_rest
-    ) = verification_excel(ws_sp, ws_sp_assem)
+    matches: list[tuple] = verification_excel(ws_sp, ws_sp_assem)
 
     wb_compare = Workbook()
     ws_compare = wb_compare.active
 
     add_headers(ws_compare)
-    for row in sorted(exact_matches, key=lambda x: x[2], reverse=True):
-        ws_compare.append(row)
-    merge_row: int = add_merge_row(ws_compare)
-    for row in fuzzy_matches:
-        ws_compare.append(row)
-    merge_row_5: int = add_merge_row(ws_compare)
-    for row in last_matches:
-        ws_compare.append(row)
-    merge_row_2: int = add_merge_row(ws_compare)
-    for row in values_sp_rest:
-        ws_compare.append(row)
-    merge_row_3: int = add_merge_row(ws_compare)
-    for row in values_sp_assem_rest:
-        ws_compare.append(row)
+    [ws_compare.append(i) for i in matches]
 
     add_alignment(ws_compare)
 
@@ -107,4 +87,4 @@ def save_verification_excel(dir_sp: str, dir_sp_assem: str):
     wb_compare.save(r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902 сравнение.xlsx')
 
 
-save_verification_excel('', '')
+create_verification_excel('', '')
