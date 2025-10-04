@@ -1,4 +1,4 @@
-from openpyxl.styles import PatternFill, Alignment
+from openpyxl.styles import PatternFill, Alignment, Side, Border
 
 
 def get_cell(
@@ -64,31 +64,43 @@ def create_fill(rgb: str):
 
 def apply_fill(fill: str, rows: tuple):
     for row in rows:
-        for cell in row:
-            cell.fill = create_fill(fill)
+        if isinstance(row, tuple):
+            for cell in row:
+                cell.fill = create_fill(fill)
+        else:
+            row.fill = create_fill(fill)
 
 
-def add_merge_row(ws) -> int:
-    row_merge: int = ws.max_row + 1
-    ws.merge_cells(start_row=row_merge, start_column=1, end_row=row_merge, end_column=7)
-    ws.cell(row=row_merge, column=1, value='Нет совпадений')
-    return row_merge
+def add_merge_row(ws, row, value: str, fill: str) -> None:
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=7)
+    cell = ws.cell(row=row, column=1, value=value)
+    apply_fill(fill, (cell,))
 
 
 def add_fill(ws):
     apply_fill('FFC000', get_cell(ws, min_col=1, min_row=1, max_row=1))  # Заголовок
 
+    headers: list[str] = ['Оставшиеся позиции', 'Совпадение < 90%', 'Совпадение на 90%', 'Совпадение на 100%']
+    fill_headers: list[str] = ['E2EFDA', 'C6E0B4', 'A9D08E', '548235']
     for row in get_cell(ws, min_row=2):
-        apply_fill('FFF2CC', ((row[0], row[1], row[5]),))
-    # apply_fill(ws, sp_fill, 1, 2, min_row=2)
-    # apply_fill(ws, sp_fill, 6, 6, min_row=2)
-    #
-    # sp_assem_fill = create_fill('BDD7EE')
-    # apply_fill(ws, sp_assem_fill, 4, 5, min_row=2)
-    # apply_fill(ws, sp_assem_fill, 7, 7, min_row=2)
-    #
-    # ver_true_fill = create_fill('92D050')
-    # ver_false_fill = create_fill('FF0000')
-    # for row in get_cell(ws, min_col=3, max_col=3, min_row=2):
-    #     for cell in row:
-    #         cell.fill = ver_true_fill if cell.value == 0 else ver_false_fill
+        if row[0].value == '-':
+            add_merge_row(ws, row[0].row, headers[-1], fill_headers[-1])
+            headers.pop()
+            fill_headers.pop()
+            continue
+        apply_fill('FFF2CC', (row[0], row[1], row[5]))  # СП
+        apply_fill('BDD7EE', (row[3], row[4], row[6]))  # СП сборки
+        apply_fill('F2F2F2', (row[7],))  # Позиция
+        if row[2].value == 0:
+            apply_fill('92D050', (row[2],))
+        else:
+            apply_fill('FF0000', (row[2],))
+
+
+def add_border(ws):
+    thin = Side(border_style="thin", color="000000")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    for row in get_cell(ws):
+        for cell in row:
+            cell.border = border

@@ -53,7 +53,7 @@ def verification_excel(ws_sp, ws_sp_assem) -> list[tuple]:
 
     last = zip_last(sp1, sp2)
 
-    return [*exact_matches, ('-',), *fuzzy_matches, ('-',), *last_matches, ('-',), *last]
+    return [('-',), *exact_matches, ('-',), *fuzzy_matches, ('-',), *last_matches, ('-',), *last]
 
 
 def create_verification_excel(dir_sp: str, dir_sp_assem: str):
@@ -82,6 +82,8 @@ def create_verification_excel(dir_sp: str, dir_sp_assem: str):
     edit_width_ws(ws_compare)
 
     add_fill(ws_compare)
+
+    add_border(ws_compare)
 
     # wb_compare.save(str(Path(dir_sp).parent / Path(dir_sp).name) + ' сравнение.xlsx')
     wb_compare.save(r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902 сравнение.xlsx')
