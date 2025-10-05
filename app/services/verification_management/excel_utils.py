@@ -33,13 +33,15 @@ def add_headers(ws):
 
 
 def add_alignment(ws):
-    for col in ['A', 'D', 'E', 'F', 'G']:
-        for cell in ws[col]:
-            cell.alignment = Alignment(horizontal='left', vertical='center')
+    alignments = {
+        'left': ['A', 'D', 'E', 'F', 'G'],
+        'center': ['B', 'C', 'E', 'H'],
+    }
 
-    for col in ['B', 'C', 'E', 'H']:
-        for cell in ws[col]:
-            cell.alignment = Alignment(horizontal='center', vertical='center')
+    for align, cols in alignments.items():
+        for col in cols:
+            for cell in ws[col]:
+                cell.alignment = Alignment(horizontal=align, vertical='center')
 
 
 def edit_width_ws(ws):
@@ -80,8 +82,14 @@ def add_merge_row(ws, row, value: str, fill: str) -> None:
 def add_fill(ws):
     apply_fill('FFC000', get_cell(ws, min_col=1, min_row=1, max_row=1))  # Заголовок
 
-    headers: list[str] = ['Оставшиеся позиции', 'Совпадение < 90%', 'Совпадение на 90%', 'Совпадение на 100%']
-    fill_headers: list[str] = ['E2EFDA', 'C6E0B4', 'A9D08E', '548235']
+    headers: list[str] = [
+        'Фасонные части',
+        'Оставшиеся позиции',
+        'Совпадение < 90%',
+        'Совпадение на 90%',
+        'Совпадение на 100%',
+    ]
+    fill_headers: list[str] = ['EBF1DE', 'E2EFDA', 'C6E0B4', 'A9D08E', '548235']
     for row in get_cell(ws, min_row=2):
         if row[0].value == '-':
             add_merge_row(ws, row[0].row, headers[-1], fill_headers[-1])
@@ -101,6 +109,5 @@ def add_border(ws):
     thin = Side(border_style="thin", color="000000")
     border = Border(left=thin, right=thin, top=thin, bottom=thin)
 
-    for row in get_cell(ws):
-        for cell in row:
-            cell.border = border
+    for cell in (cell for row in get_cell(ws) for cell in row):
+        cell.border = border

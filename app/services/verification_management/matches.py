@@ -4,6 +4,38 @@ from itertools import zip_longest
 from thefuzz import fuzz
 
 
+def get_secondary_items(sp: list[tuple]) -> tuple[list[tuple], list[tuple]]:
+    last_sp: list[tuple] = []
+    secondary_items: list[tuple] = []
+    items: set[str] = {
+        'хомут',
+        'рама',
+        'труба',
+        'отвод',
+        'патрубок',
+        'фланец',
+        'переход',
+        'тройник',
+        'трубка',
+    }
+    for value in sp:
+        for item in items:
+            if value[3].lower().startswith(item):
+                secondary_items.append((
+                    '',
+                    '',
+                    '',
+                    *value[:2],
+                    '',
+                    value[3]
+                ))
+                break
+        else:
+            last_sp.append(value)
+
+    return last_sp, secondary_items
+
+
 def get_exact_matches(
         values_sp: list[tuple],
         values_sp_assem: list[tuple]

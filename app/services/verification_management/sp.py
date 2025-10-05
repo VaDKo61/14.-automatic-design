@@ -20,7 +20,7 @@ def get_dir_sp(dir_project: str, number_project: str) -> str:
 
     for file in dir_sp.iterdir():
         if file.is_file():
-            if number_project in file.stem:
+            if number_project in file.stem and not file.stem.endswith('сравнение'):
                 return str(file)
     else:
         raise FileNotFoundError(f'Специя с номером проекта {number_project} не найдена')
@@ -41,6 +41,8 @@ def verification_excel(ws_sp, ws_sp_assem) -> list[tuple]:
     sp1: list[tuple] = [row for row in get_cell(ws_sp, min_col=1, max_col=5, min_row=3, values_only=True)]
     sp2: list[tuple] = [row for row in get_cell(ws_sp_assem, min_row=2, values_only=True)]
 
+    sp2, secondary_items = get_secondary_items(sp2)
+
     exact_matches, sp1, sp2 = get_exact_matches(sp1, sp2)
 
     fuzzy_matches, sp1, sp2 = get_fuzzy_matches(sp1, sp2)
@@ -53,21 +55,32 @@ def verification_excel(ws_sp, ws_sp_assem) -> list[tuple]:
 
     last = zip_last(sp1, sp2)
 
-    return [('-',), *exact_matches, ('-',), *fuzzy_matches, ('-',), *last_matches, ('-',), *last]
+    return [
+        ('-',),
+        *exact_matches,
+        ('-',),
+        *fuzzy_matches,
+        ('-',),
+        *last_matches,
+        ('-',),
+        *last,
+        ('-',),
+        *secondary_items
+    ]
 
 
 def create_verification_excel(dir_sp: str, dir_sp_assem: str):
-    # wb_sp = load_workbook(dir_sp)
-    # ws_sp = wb_sp.active
-    #
-    # wb_sp_assem = load_workbook(dir_sp_assem)
-    # ws_sp_assem = wb_sp_assem.active
-
-    wb_sp = load_workbook(r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902.xlsx')
+    wb_sp = load_workbook(dir_sp)
     ws_sp = wb_sp.active
 
-    wb_sp_assem = load_workbook(r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902_SW.xlsx')
+    wb_sp_assem = load_workbook(dir_sp_assem)
     ws_sp_assem = wb_sp_assem.active
+
+    # wb_sp = load_workbook(r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902.xlsx')
+    # ws_sp = wb_sp.active
+    #
+    # wb_sp_assem = load_workbook(r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902_SW.xlsx')
+    # ws_sp_assem = wb_sp_assem.active
 
     matches: list[tuple] = verification_excel(ws_sp, ws_sp_assem)
 
@@ -85,8 +98,8 @@ def create_verification_excel(dir_sp: str, dir_sp_assem: str):
 
     add_border(ws_compare)
 
-    # wb_compare.save(str(Path(dir_sp).parent / Path(dir_sp).name) + ' сравнение.xlsx')
-    wb_compare.save(r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902 сравнение.xlsx')
+    wb_compare.save(str(Path(dir_sp).parent / Path(dir_sp).name) + ' сравнение.xlsx')
+    # wb_compare.save(r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902 сравнение.xlsx')
 
 
-create_verification_excel('', '')
+# create_verification_excel('', '')
