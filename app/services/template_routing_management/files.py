@@ -17,7 +17,7 @@ def get_list_files() -> list | None:
     return [f.name for f in path.iterdir() if f.is_file()]
 
 
-def get_last_routing() -> dict[str, tuple[int, str]]:
+def get_last_routing() -> dict[str, tuple[int, str, str]]:
     try:
         sw_app, sw_assem = get_sw_app_and_model()
     except SwError as e:
@@ -28,15 +28,17 @@ def get_last_routing() -> dict[str, tuple[int, str]]:
     except SwError as e:
         raise SwError(str(e))
 
-    last_routing: dict[str, tuple[int, str]] = {}
+    last_routing: dict[str, tuple[int, str, str]] = {}
     for component in sw_assem.GetComponents(True):
         if component.Name2.startswith('БТП'):
             name_split: list[str] = re.split('[. ]', component.Name2.split('-')[0])
+            if name_split[-1] == 'СБ':
+                name_split.pop()
             name: str = '.'.join(name_split[3:-1])
             number: int = int(name_split[-1][-3::])
 
             if last_routing.get(name, (0, ''))[0] < number:
-                last_routing[name] = (int(number), component.Name2)
+                last_routing[name] = (int(number), Path(component.GetPathName).name, component.Name2)
 
     return last_routing
 

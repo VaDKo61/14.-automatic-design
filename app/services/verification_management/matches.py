@@ -33,7 +33,7 @@ def get_secondary_items(sp: list[tuple]) -> tuple[list[tuple], list[tuple]]:
         else:
             last_sp.append(value)
 
-    return last_sp, secondary_items
+    return last_sp, sorted(secondary_items, key=lambda x: x[6])
 
 
 def get_exact_matches(
@@ -150,4 +150,4 @@ def match_items(
 def zip_last(sp1: list[tuple], sp2: list[tuple]) -> list[tuple]:
     sp1.sort(key=lambda x: x[3])
     sp2.sort(key=lambda x: x[3])
-    return [(*a[:2], '', *b[:2], a[3], b[3], a[4]) for a, b in zip_longest(sp1, sp2, fillvalue=('', '', '', ''))]
+    return [(*a[:2], '', *b[:2], a[3], b[3], a[4]) for a, b in zip_longest(sp1, sp2, fillvalue=('', '', '', '', ''))]
