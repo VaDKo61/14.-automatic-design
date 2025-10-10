@@ -6,7 +6,7 @@ def get_list_files_for_ui() -> list[str]:
     return get_list_files()
 
 
-def get_current_routing_for_ui(main_window) -> dict[str, tuple[int, str]] | None:
+def get_current_routing_for_ui(main_window) -> dict[str, tuple[int, str, str]] | None:
     try:
         return get_last_routing()
     except SwError as e:

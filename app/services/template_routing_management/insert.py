@@ -1,16 +1,25 @@
+import re
+from pathlib import Path
+
 import pythoncom
 
 from services.sw_utils import get_sw_app_and_model, create_com
 from .files import copy_template
 
 
-def create_new_name(selected_routing: tuple[int, str]) -> str:
+def create_new_name(selected_routing: tuple[int, str], selected_file: str) -> str:
     if selected_routing[0] == -1:
-        return selected_routing[1] + '.SLDASM'
-    begin_name_new_template: str = selected_routing[1].split('-')[0][:-2]
+        return selected_routing[1] + Path(selected_file).suffix
+    name_parts: list[str] = re.split('[. ]', selected_routing[1])
+
+    index_number_routing: int = -2
+    if name_parts[index_number_routing] == 'СБ':
+        index_number_routing -= 1
+
     end_name: int = selected_routing[0] + 1
-    end_name_new_template: str = str(end_name) if end_name >= 10 else '0' + str(end_name)
-    return begin_name_new_template + end_name_new_template + '.SLDASM'
+    name_parts[index_number_routing] = (str(end_name) if end_name >= 10 else '0' + str(end_name))
+
+    return '.'.join(name_parts)
 
 
 def get_coordinate_selected_routing(sw_assem, selected_routing: str) -> list[float]:
@@ -22,7 +31,7 @@ def insert_template_routing(selected_file: str, selected_routing: tuple[int, str
     sw_app, sw_assem = get_sw_app_and_model()
 
     assem_dir: str = sw_assem.GetPathName
-    new_name_template: str = create_new_name(selected_routing)
+    new_name_template: str = create_new_name(selected_routing, selected_file)
 
     try:
         copy_template(
@@ -36,10 +45,15 @@ def insert_template_routing(selected_file: str, selected_routing: tuple[int, str
     if selected_routing[0] == -1:
         coord_routing: list[float] = [0, 0, 0]
     else:
-        coord_routing: list[float] = get_coordinate_selected_routing(sw_assem, selected_routing[1])
+        coord_routing: list[float] = get_coordinate_selected_routing(sw_assem, selected_routing[2])
 
     arg1 = create_com(2, pythoncom.VT_BYREF | pythoncom.VT_I4)
     arg2 = create_com(128, pythoncom.VT_BYREF | pythoncom.VT_I4)
-    sw_app.OpenDoc6(new_name_template, 2, 0, '', arg1, arg2)
+    doc_type: int = 2
+    if new_name_template.lower().endswith('sldprt'):
+        doc_type = 1
+    for i in range(3):
+        if sw_app.OpenDoc6(new_name_template, doc_type, 0, '', arg1, arg2):
+            break
     sw_assem.AddComponent5(new_name_template, 0, '', False, '', *coord_routing)
     sw_app.CloseDoc(new_name_template)

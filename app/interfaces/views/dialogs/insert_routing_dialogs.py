@@ -33,9 +33,10 @@ class ListButtonsDialog(QDialog):
             return
 
         for button_name in buttons:
-            btn = QPushButton(button_name)
             if name_list == 'Файлы':
                 btn = QPushButton(button_name.split('.')[0])
+            else:
+                btn = QPushButton(button_name)
             btn.clicked.connect(lambda checked, f=button_name: self.handle_button_click(f))
             self.buttons_layout.addWidget(btn)
         if name_list == 'Трубопроводы':
@@ -65,7 +66,7 @@ def show_file_routing_buttons_dialog(main_window) -> None:
         return
     dialog_files = ListButtonsDialog(files, 'Выберите шаблон', 'Файлы', main_window)
 
-    current_routing: dict[str, tuple[int, str]] = {}
+    current_routing: dict[str, tuple[int, str, str]] = {}
     if dialog_files.exec() == QDialog.Accepted and dialog_files.selected_buttons:
         current_routing = get_current_routing_for_ui(main_window)
     else:
