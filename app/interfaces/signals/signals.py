@@ -1,6 +1,6 @@
-from interfaces.controllers.routing_controller import InsertTemplateRoutingHandler
-from interfaces.controllers.verification_controller import verification_sp_handle
 from interfaces.controllers.project_controller import CreateProjectHandler
+from interfaces.controllers.routing_controller import InsertTemplateRoutingHandler
+from interfaces.controllers.verification_controller import VerificationAssemSPHandler
 
 
 def setup_signals(main_window):
@@ -13,5 +13,5 @@ def setup_signals(main_window):
     )
 
     main_window.button_verification_project.clicked.connect(
-        lambda: verification_sp_handle(main_window)
+        lambda: VerificationAssemSPHandler(main_window).handle()
     )

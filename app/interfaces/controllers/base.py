@@ -20,6 +20,7 @@ class BaseUIHandler(ABC):
                 InvalidProjectNumberError,
                 ProjectExistsError,
                 ValueError,
+                FileNotFoundError,
         ) as e:
             show_warning(self.main_window, str(e))
         except Exception as e:
