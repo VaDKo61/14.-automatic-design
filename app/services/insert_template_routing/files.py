@@ -8,16 +8,16 @@ from services.sw_utils import get_sw_app_and_model, SwError, assembly_verificati
 BASE_DIR: str = r'C:\SWR-Библиотеки 2021\Мое'
 
 
-def get_list_files() -> list | None:
+def get_list_files() -> list:
     path = Path(BASE_DIR)
 
     if not path.exists():
-        return []
+        raise FileExistsError('По заданному пути нет шаблонов')
 
     return [f.name for f in path.iterdir() if f.is_file()]
 
 
-def get_last_routing() -> dict[str, tuple[int, str, str]]:
+def get_current_routing() -> dict[str, tuple[int, str, str]]:
     try:
         sw_app, sw_assem = get_sw_app_and_model()
     except SwError as e:

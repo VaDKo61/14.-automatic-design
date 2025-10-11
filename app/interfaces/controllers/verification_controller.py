@@ -1,4 +1,5 @@
-from services import SwError, verification_sp
+from services.sw_utils import SwError
+from services.verification_management import verification_sp
 from interfaces.views.messages import show_warning
 
 

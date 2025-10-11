@@ -1,96 +1,59 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QScrollArea, QWidget, QPushButton
+from typing import Optional
 
-from interfaces.controllers import get_list_files_for_ui, get_current_routing_for_ui, insert_template_routing_handle
-
-from interfaces.views.messages import show_warning
-from .inputs import ask_input_text
+from .inputs import safe_ask_input_text
 
 
 class ListButtonsDialog(QDialog):
-    def __init__(self, name_buttons: list[str], message: str, name_list: str, parent=None):
+
+    def __init__(
+            self,
+            items: list[str],
+            title: str,
+            list_type: str = '',
+            parent=None,
+    ):
         super().__init__(parent)
-        self.setWindowTitle(message)
+        self.setWindowTitle(title)
         self.resize(500, 400)
+        self.selected: Optional[str] = None
 
         layout = QVBoxLayout(self)
-
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-
+        scroll = QScrollArea(widgetResizable=True)
         container = QWidget()
-        self.buttons_layout = QVBoxLayout(container)
-        scroll.setWidget(container)
+        vbox = QVBoxLayout(container)
 
+        for name in items:
+            btn = QPushButton(name.split('.')[0] if list_type == 'Файлы' else name)
+            btn.clicked.connect(lambda _, n=name: self._select(n))
+            vbox.addWidget(btn)
+
+        if list_type == 'Трубопроводы':
+            new_btn = QPushButton('Ввести полное имя нового маршрута')
+            new_btn.clicked.connect(lambda: self._input())
+            vbox.addWidget(new_btn)
+
+        vbox.addStretch()
+        scroll.setWidget(container)
         layout.addWidget(scroll)
 
-        self.selected_buttons: str | None = None
-        self.render_buttons(name_buttons, name_list)
+    def _select(self, name: str) -> None:
+        self.selected = name
+        self.accept()
 
-    def render_buttons(self, buttons: list[str], name_list: str):
-        if not buttons and name_list == 'Файлы':
-            show_warning(self, f'{name_list} не найдены')
-            self.close()
+    def _input(self) -> None:
+        value = safe_ask_input_text('Введите полное имя шаблона')
+        if not value:
             return
-
-        for button_name in buttons:
-            if name_list == 'Файлы':
-                btn = QPushButton(button_name.split('.')[0])
-            else:
-                btn = QPushButton(button_name)
-            btn.clicked.connect(lambda checked, f=button_name: self.handle_button_click(f))
-            self.buttons_layout.addWidget(btn)
-        if name_list == 'Трубопроводы':
-            button_name = 'Ввести полное имя нового маршрута'
-            btn = QPushButton(button_name)
-            btn.clicked.connect(lambda checked: self.handle_button_click_input())
-            self.buttons_layout.addWidget(btn)
-
-        self.buttons_layout.addStretch()
-
-    def handle_button_click(self, buttons_name: str) -> None:
-        self.selected_buttons = buttons_name
+        self.selected = value
         self.accept()
 
-    def handle_button_click_input(self) -> None:
-        routing_name, ok = ask_input_text('Введите полное имя маршрута:')
-        if not ok:
-            self.selected_buttons = None
-        self.selected_buttons = routing_name
-        self.accept()
-
-
-def show_file_routing_buttons_dialog(main_window) -> None:
-    files: list[str] = get_list_files_for_ui()
-    if not files:
-        show_warning(main_window, 'Файлы не найдены')
-        return
-    dialog_files = ListButtonsDialog(files, 'Выберите шаблон', 'Файлы', main_window)
-
-    current_routing: dict[str, tuple[int, str, str]] = {}
-    if dialog_files.exec() == QDialog.Accepted and dialog_files.selected_buttons:
-        current_routing = get_current_routing_for_ui(main_window)
-    else:
-        return
-
-    dialog_routing = ListButtonsDialog(
-        sorted(list(current_routing.keys())),
-        'Выберите трубопровод, который продолжим',
-        'Трубопроводы',
-        main_window
-    )
-
-    if dialog_routing.exec() == QDialog.Accepted:
-        if not dialog_routing.selected_buttons:
-            show_warning(main_window, 'Имя пустое')
-        else:
-            if dialog_routing.selected_buttons not in current_routing:
-                selected_buttons = (-1, dialog_routing.selected_buttons)
-            else:
-                selected_buttons = current_routing[dialog_routing.selected_buttons]
-            insert_template_routing_handle(
-                main_window,
-                dialog_files.selected_buttons,
-                selected_buttons
-            )
-    else:
-        return
+    @staticmethod
+    def get_selection(
+            items: list[str],
+            title: str,
+            list_type: str = '',
+            parent=None
+    ) -> str:
+        dlg = ListButtonsDialog(items, title, list_type, parent)
+        return dlg.selected if dlg.exec() else None

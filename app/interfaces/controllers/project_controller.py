@@ -1,20 +1,15 @@
-from services import create_structure, InvalidProjectNumberError, ProjectExistsError
-from interfaces.views.messages import show_success_with_link, show_warning, show_error
-from interfaces.views.dialogs.inputs import ask_input_text
+from services.project_management import create_structure
+
+from .base import BaseUIHandler
+from ..views.messages import show_success_with_link
+from ..views.dialogs.inputs import ask_input_text
 
 
-def create_project_handle(main_window) -> None:
-    project_number, ok = ask_input_text('Введите номер заказа:')
+class CreateProjectHandler(BaseUIHandler):
+    def _execute(self):
+        project_number, ok = ask_input_text('Введите номер заказа:')
+        if not ok:
+            return
 
-    if not ok:
-        return None
-
-    try:
         path = create_structure(project_number)
-        show_success_with_link(main_window, path)
-    except InvalidProjectNumberError as e:
-        show_warning(main_window, str(e))
-    except ProjectExistsError as e:
-        show_warning(main_window, str(e))
-    except Exception as e:
-        show_error(main_window, 'Критическая ошибка', str(e))
+        show_success_with_link(self.main_window, path)

@@ -1,14 +1,15 @@
-from interfaces.controllers import create_project_handle, verification_sp_handle
-from interfaces.views.dialogs import show_file_routing_buttons_dialog
+from interfaces.controllers.routing_controller import InsertTemplateRoutingHandler
+from interfaces.controllers.verification_controller import verification_sp_handle
+from interfaces.controllers.project_controller import CreateProjectHandler
 
 
 def setup_signals(main_window):
     main_window.button_create_project.clicked.connect(
-        lambda: create_project_handle(main_window)
+        lambda: CreateProjectHandler(main_window).handle()
     )
 
     main_window.button_paste_template_routing.clicked.connect(
-        lambda: show_file_routing_buttons_dialog(main_window)
+        lambda: InsertTemplateRoutingHandler(main_window).handle()
     )
 
     main_window.button_verification_project.clicked.connect(
