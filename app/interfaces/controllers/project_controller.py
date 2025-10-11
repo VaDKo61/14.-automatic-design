@@ -6,6 +6,8 @@ from ..views.dialogs.inputs import ask_input_text
 
 
 class CreateProjectHandler(BaseUIHandler):
+    """Контроллер для создания структуры проекта"""
+
     def _execute(self):
         project_number, ok = ask_input_text('Введите номер заказа:')
         if not ok:

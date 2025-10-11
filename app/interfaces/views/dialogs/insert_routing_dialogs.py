@@ -5,6 +5,7 @@ from .inputs import safe_ask_input_text
 
 
 class ListButtonsDialog(QDialog):
+    """Простой диалог выбора элемента из списка."""
 
     def __init__(
             self,

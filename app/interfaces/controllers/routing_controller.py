@@ -5,6 +5,8 @@ from ..views.dialogs.insert_routing_dialogs import ListButtonsDialog
 
 
 class InsertTemplateRoutingHandler(BaseUIHandler):
+    """Контроллер для вставки шаблона маршрута."""
+
     def _execute(self):
         selected_file: str = self._select_template_file()
         if not selected_file:
@@ -17,6 +19,8 @@ class InsertTemplateRoutingHandler(BaseUIHandler):
         insert_template_routing(selected_file, selected_routing)
 
     def _select_template_file(self) -> str:
+        """Показывает диалог выбора шаблона."""
+
         files: list[str] = get_list_files()
         if not files:
             raise FileExistsError('Шаблоны не найдены')
@@ -29,6 +33,8 @@ class InsertTemplateRoutingHandler(BaseUIHandler):
         )
 
     def _select_routing(self, current_routing: dict[str, tuple[int, str, str]]) -> tuple[int, str]:
+        """Показывает диалог выбора маршрута (существующего или нового)."""
+
         selected_routing = ListButtonsDialog.get_selection(
             sorted(current_routing.keys()),
             'Выберите трубопровод, который продолжим',

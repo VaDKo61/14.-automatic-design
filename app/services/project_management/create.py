@@ -8,9 +8,26 @@ TEMPLATE_FILES: list[Path] = [
     Path(TEMPLATES_PATH) / 'Замечания к БТП.docx',
     Path(TEMPLATES_PATH) / 'Чек-лист 3D.xlsm'
 ]
+SUBFOLDERS: tuple[str, ...] = (
+    'ИД',
+    r'КД/УВУ/Проверка',
+    r'КД/СО/Проверка',
+    r'КД/ГВС/Проверка',
+    'КД на печать',
+    'На согласование',
+    'СП',
+    r'КД/УВУ/Проверка СП',
+    r'КД/СО/Проверка СП',
+    r'КД/ГВС/Проверка СП',
+)
+TARGET_FOLDERS: set[str] = {
+    r'КД/УВУ/Проверка',
+    r'КД/СО/Проверка',
+    r'КД/ГВС/Проверка',
+}
 
 
-def create_structure(project_number: str) -> Path | None:
+def create_structure(project_number: str) -> Path:
     if not project_number or not project_number.isdigit():
         raise InvalidProjectNumberError('Данные не были введены или введены некорректно. '
                                         'Пожалуйста, заполните поля.')
