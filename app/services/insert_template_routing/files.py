@@ -3,7 +3,7 @@ import shutil
 
 from pathlib import Path
 
-from services.sw_utils import get_sw_app_and_model, SwError, assembly_verification
+from services.sw_utils import get_sw_app_and_model, SwError, verification_assembly
 
 BASE_DIR: str = r'C:\SWR-Библиотеки 2021\Мое'
 
@@ -24,7 +24,7 @@ def get_current_routing() -> dict[str, tuple[int, str, str]]:
         raise SwError(str(e))
 
     try:
-        assembly_verification(sw_assem)
+        verification_assembly(sw_assem)
     except SwError as e:
         raise SwError(str(e))
 

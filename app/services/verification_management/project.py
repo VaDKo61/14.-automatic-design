@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from services.sw_utils import get_sw_app_and_model, SwError, assembly_verification
+from services.sw_utils import get_sw_app_and_model, SwError, verification_assembly
 
 
 def get_number_project(dir_project: str) -> str:
@@ -14,7 +14,7 @@ def get_dir_project() -> tuple:
         raise SwError(str(e))
 
     try:
-        assembly_verification(sw_assem)
+        verification_assembly(sw_assem)
     except SwError as e:
         raise SwError(str(e))
 

@@ -31,7 +31,7 @@ class ListButtonsDialog(QDialog):
 
         if list_type == 'Трубопроводы':
             new_btn = QPushButton('Ввести полное имя нового маршрута')
-            new_btn.clicked.connect(lambda: self._input())
+            new_btn.clicked.connect(self._input)
             vbox.addWidget(new_btn)
 
         vbox.addStretch()

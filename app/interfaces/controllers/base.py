@@ -1,3 +1,5 @@
+import traceback
+
 from abc import ABC, abstractmethod
 
 from interfaces.views.messages import show_warning, show_error
@@ -24,6 +26,7 @@ class BaseUIHandler(ABC):
         ) as e:
             show_warning(self.main_window, str(e))
         except Exception as e:
+            traceback.print_exc()  # Отладка
             show_error(self.main_window, 'Критическая ошибка', str(e))
 
     @abstractmethod
