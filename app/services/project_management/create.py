@@ -59,5 +59,6 @@ def _copy_templates_to_folder(folder_path: Path, project_number: str) -> None:
 
     for template_file in TEMPLATE_FILES:
         if template_file.exists():
-            dest_file = folder_path / f'{template_file.stem} {project_number}{template_file.suffix}'
+            dest_file = (folder_path /
+                         f'{template_file.stem} {project_number}{template_file.suffix}')
             shutil.copy(template_file, dest_file)

@@ -1,4 +1,8 @@
-from services.insert_template_routing import get_list_files, get_current_routing, insert_template_routing
+from services.insert_template_routing import (
+    get_list_files,
+    get_current_routing,
+    insert_template_routing
+)
 
 from .base import BaseUIHandler
 from ..views.dialogs.insert_routing_dialogs import ListButtonsDialog
@@ -32,7 +36,10 @@ class InsertTemplateRoutingHandler(BaseUIHandler):
             self.main_window
         )
 
-    def _select_routing(self, current_routing: dict[str, tuple[int, str, str]]) -> tuple[int, str, str]:
+    def _select_routing(
+            self,
+            current_routing: dict[str, tuple[int, str, str]]
+    ) -> tuple[int, str, str]:
         """Показывает диалог выбора маршрута (существующего или нового)."""
 
         selected_routing = ListButtonsDialog.get_selection(

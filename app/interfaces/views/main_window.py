@@ -22,9 +22,15 @@ class MainWindow(QMainWindow):
 
         self.buttons_panel = ButtonsPanel()
 
-        self.button_create_project = self.buttons_panel.add_button(s.BTN_CREATE_PROJECT)
-        self.button_verification_project = self.buttons_panel.add_button(s.BTN_VERIFICATION_PROJECT)
-        self.button_paste_template_routing = self.buttons_panel.add_button(s.BTN_PASTE_TEMPLATE_ROUTING)
+        self.button_create_project = (
+            self.buttons_panel.add_button(s.BTN_CREATE_PROJECT)
+        )
+        self.button_verification_project = (
+            self.buttons_panel.add_button(s.BTN_VERIFICATION_PROJECT)
+        )
+        self.button_paste_template_routing = (
+            self.buttons_panel.add_button(s.BTN_PASTE_TEMPLATE_ROUTING)
+        )
 
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)

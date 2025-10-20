@@ -29,7 +29,10 @@ def get_coordinate_selected_routing(sw_assem, selected_routing: str) -> list[flo
     return comp_routing.Transform2.ArrayData[9:12]
 
 
-def insert_template_routing(selected_file: str, selected_routing: tuple[int, str, str]) -> None:
+def insert_template_routing(
+        selected_file: str,
+        selected_routing: tuple[int, str, str]
+) -> None:
     with SolidWorksHandler() as sw:
         assem_dir: Path = Path(sw.model.GetPathName)
         target_dir: Path = assem_dir.parent
@@ -44,7 +47,10 @@ def insert_template_routing(selected_file: str, selected_routing: tuple[int, str
         if selected_routing[0] == -1:
             coord_routing: list[float] = [0.0, 0.0, 0.0]
         else:
-            coord_routing: list[float] = get_coordinate_selected_routing(sw.model, selected_routing[2])
+            coord_routing: list[float] = get_coordinate_selected_routing(
+                sw.model,
+                selected_routing[2]
+            )
 
         arg1 = create_com(2, pythoncom.VT_BYREF | pythoncom.VT_I4)
         arg2 = create_com(128, pythoncom.VT_BYREF | pythoncom.VT_I4)

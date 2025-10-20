@@ -55,6 +55,8 @@ def copy_template(selected_file: str, assem_dir: str, new_name_template: str) ->
     new_file = Path(assem_dir) / new_name_template
 
     if new_file.exists():
-        raise FileExistsError(f'Файл {new_name_template} уже существует, копирование пропущено')
+        raise FileExistsError(
+            f'Файл {new_name_template} уже существует, копирование пропущено'
+        )
 
     shutil.copy2(old_file, new_file)
