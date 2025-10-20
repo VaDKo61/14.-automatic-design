@@ -1,4 +1,4 @@
-from .connection import get_sw_app_and_model, verification_assembly, create_com
+from .handler import get_sw_app_and_model, verification_assembly
 from .errors import SwAppError, SwModelError, SwError, SwAssemblyError
 
 __all__ = [
@@ -8,5 +8,4 @@ __all__ = [
     'SwError',
     'SwAssemblyError',
     'verification_assembly',
-    'create_com',
 ]

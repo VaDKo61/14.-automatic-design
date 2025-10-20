@@ -32,7 +32,7 @@ class InsertTemplateRoutingHandler(BaseUIHandler):
             self.main_window
         )
 
-    def _select_routing(self, current_routing: dict[str, tuple[int, str, str]]) -> tuple[int, str]:
+    def _select_routing(self, current_routing: dict[str, tuple[int, str, str]]) -> tuple[int, str, str]:
         """Показывает диалог выбора маршрута (существующего или нового)."""
 
         selected_routing = ListButtonsDialog.get_selection(

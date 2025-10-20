@@ -3,50 +3,56 @@ import shutil
 
 from pathlib import Path
 
-from services.sw_utils import get_sw_app_and_model, SwError, verification_assembly
+from ..sw_utils.handler import SolidWorksHandler
 
-BASE_DIR: str = r'C:\SWR-Библиотеки 2021\Мое'
+BASE_DIR: Path = Path(r'C:\SWR-Библиотеки 2021\Мое')
 
 
 def get_list_files() -> list:
-    path = Path(BASE_DIR)
+    if not BASE_DIR.exists():
+        raise FileNotFoundError(f'Папка с шаблонами не найдена: {BASE_DIR}')
 
-    if not path.exists():
-        raise FileExistsError('По заданному пути нет шаблонов')
-
-    return [f.name for f in path.iterdir() if f.is_file()]
+    return [f.name for f in BASE_DIR.iterdir() if f.is_file()]
 
 
 def get_current_routing() -> dict[str, tuple[int, str, str]]:
-    try:
-        sw_app, sw_assem = get_sw_app_and_model()
-    except SwError as e:
-        raise SwError(str(e))
+    with SolidWorksHandler() as sw:
+        sw.verify_assembly()
 
-    try:
-        verification_assembly(sw_assem)
-    except SwError as e:
-        raise SwError(str(e))
+        latest_routing: dict[str, tuple[int, str, str]] = {}
+        components = sw.model.GetComponents(True)
+        if not components:
+            return {}
 
-    last_routing: dict[str, tuple[int, str, str]] = {}
-    for component in sw_assem.GetComponents(True):
-        if component.Name2.startswith('БТП'):
+        for component in components:
+            comp_name = component.Name2
+
+            if not comp_name.startswith('БТП'):
+                continue
+
             name_split: list[str] = re.split('[. ]', component.Name2.split('-')[0])
+
             if name_split[-1] == 'СБ':
                 name_split.pop()
-            name: str = '.'.join(name_split[3:-1])
-            number: int = int(name_split[-1][-3::])
 
-            if last_routing.get(name, (0, ''))[0] < number:
-                last_routing[name] = (int(number), Path(component.GetPathName).name, component.Name2)
+            try:
+                name: str = '.'.join(name_split[3:-1])
+                number: int = int(name_split[-1][-3::])
+            except (IndexError, ValueError):
+                continue
 
-    return last_routing
+            comp_path = Path(component.GetPathName)
+
+            prev_number, *_ = latest_routing.get(name, (0, '', ''))
+            if number > prev_number:
+                latest_routing[name] = (number, comp_path.name, comp_name)
+
+        return latest_routing
 
 
 def copy_template(selected_file: str, assem_dir: str, new_name_template: str) -> None:
-    old_file = Path(BASE_DIR) / selected_file
-    new_file_dir = Path(assem_dir)
-    new_file = new_file_dir / new_name_template
+    old_file = BASE_DIR / selected_file
+    new_file = Path(assem_dir) / new_name_template
 
     if new_file.exists():
         raise FileExistsError(f'Файл {new_name_template} уже существует, копирование пропущено')

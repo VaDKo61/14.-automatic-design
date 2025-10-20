@@ -1,4 +1,6 @@
 import pythoncom
+import traceback
+
 import win32com.client
 
 from .errors import SwAppError, SwModelError, SwAssemblyError
@@ -12,7 +14,20 @@ class SolidWorksHandler:
         self.model = None
         self._com_initialized = False
 
-    def connect(self):
+    def __enter__(self):
+        self._connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._close()
+        traceback.print_exception(exc_type, exc_val, exc_tb)  # Отладка
+        return False
+
+    def verify_assembly(self):
+        if self.model.GetType != 2:
+            raise SwAssemblyError
+
+    def _connect(self):
         if not self._com_initialized:
             pythoncom.CoInitialize()
             self._com_initialized = True
@@ -30,7 +45,7 @@ class SolidWorksHandler:
 
         self._enable_boost(False)
 
-    def close(self):
+    def _close(self):
         self._enable_boost(True)
 
         try:
@@ -48,13 +63,7 @@ class SolidWorksHandler:
         self.model.ConfigurationManager.EnableConfigurationTree = enable
         self.model.ActiveView.EnableGraphicsUpdate = enable
 
-    def __enter__(self):
-        self.connect()
-        return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-        return False
 
 
 def get_sw_app_and_model():
@@ -74,11 +83,3 @@ def get_sw_app_and_model():
 def verification_assembly(sw_model) -> None:
     if sw_model.GetType != 2:
         raise SwAssemblyError
-
-
-def create_com(value, *args):
-    combined_flags = 0
-    for flag in args:
-        combined_flags |= flag
-
-    return win32com.client.VARIANT(combined_flags, value)
