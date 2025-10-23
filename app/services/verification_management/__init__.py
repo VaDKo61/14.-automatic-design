@@ -1,5 +1,5 @@
-from .verification_sp import verification_sp
+from .verification import verification_spec
 
 __all__ = [
-    'verification_sp',
+    'verification_spec',
 ]

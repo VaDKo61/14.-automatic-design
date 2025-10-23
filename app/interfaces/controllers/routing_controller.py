@@ -6,6 +6,7 @@ from services.insert_template_routing import (
 
 from .base import BaseUIHandler
 from ..views.dialogs.insert_routing_dialogs import ListButtonsDialog
+from ..views.messages import show_info
 
 
 class InsertTemplateRoutingHandler(BaseUIHandler):
@@ -21,6 +22,8 @@ class InsertTemplateRoutingHandler(BaseUIHandler):
         selected_routing = self._select_routing(current_routing)
 
         insert_template_routing(selected_file, selected_routing)
+
+        show_info(self.main_window, 'Выполнено', 'Шаблон успешно вставлен')
 
     def _select_template_file(self) -> str:
         """Показывает диалог выбора шаблона."""
@@ -51,4 +54,4 @@ class InsertTemplateRoutingHandler(BaseUIHandler):
         if not selected_routing:
             raise ValueError('Имя пустое')
 
-        return current_routing.get(selected_routing, (-1, selected_routing))
+        return current_routing.get(selected_routing, (-1, selected_routing, -1))

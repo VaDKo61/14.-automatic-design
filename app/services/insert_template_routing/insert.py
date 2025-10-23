@@ -2,31 +2,9 @@ import pythoncom
 
 from pathlib import Path
 
-from .files import copy_template
+from .files import _copy_template
 from ..sw_utils.handler import SolidWorksHandler
 from ..sw_utils.helpers import create_com
-
-
-def create_new_name(selected_routing: tuple[int, str, str], selected_file: str) -> str:
-    index, routing_name, _ = selected_routing
-    suffix: str = Path(selected_file).suffix
-
-    if index == -1:
-        return routing_name + suffix
-
-    name_parts: list[str] = routing_name.split('.')
-    end_name: int = index + 1
-    name_parts[-2] = f'{end_name:02d} СБ'
-
-    return '.'.join(name_parts)
-
-
-def get_coordinate_selected_routing(sw_assem, selected_routing: str) -> list[float]:
-    comp_routing = sw_assem.GetComponentByName(selected_routing)
-    if not comp_routing:
-        raise ValueError(f"Компонент '{selected_routing}' не найден в сборке.")
-
-    return comp_routing.Transform2.ArrayData[9:12]
 
 
 def insert_template_routing(
@@ -37,17 +15,17 @@ def insert_template_routing(
         assem_dir: Path = Path(sw.model.GetPathName)
         target_dir: Path = assem_dir.parent
 
-        new_name_template: str = create_new_name(selected_routing, selected_file)
+        new_name_template: str = _create_new_name(selected_routing, selected_file)
 
         try:
-            copy_template(selected_file, str(target_dir), new_name_template)
+            _copy_template(selected_file, str(target_dir), new_name_template)
         except FileExistsError:
             raise FileExistsError(f'Файл {new_name_template} уже существует')
 
         if selected_routing[0] == -1:
-            coord_routing: list[float] = [0.0, 0.0, 0.0]
+            coord_routing: list[float] = [0.0, 0.1, 0.0]
         else:
-            coord_routing: list[float] = get_coordinate_selected_routing(
+            coord_routing: list[float] = _get_coordinate_selected_routing(
                 sw.model,
                 selected_routing[2]
             )
@@ -64,4 +42,28 @@ def insert_template_routing(
 
         sw.model.AddComponent5(new_name_template, 0, '', False, '', *coord_routing)
         sw.app.CloseDoc(new_name_template)
-        sw.app.SendmsgToUser(f'{new_name_template} успешно вставлен')
+
+
+def _create_new_name(selected_routing: tuple[int, str, str], selected_file: str) -> str:
+    index, routing_name, _ = selected_routing
+    suffix: str = Path(selected_file).suffix
+
+    if index == -1:
+        return routing_name + suffix
+
+    name_parts: list[str] = routing_name.split('.')
+    end_name: int = index + 1
+    name_parts[-2] = f'{end_name:02d} СБ'
+
+    return '.'.join(name_parts)
+
+
+def _get_coordinate_selected_routing(sw_assem, selected_routing: str) -> list[float]:
+    comp_routing = sw_assem.GetComponentByName(selected_routing)
+    if not comp_routing:
+        raise ValueError(f"Компонент '{selected_routing}' не найден в сборке.")
+
+    coordinate: list[float] = list(comp_routing.Transform2.ArrayData[9:12])
+    coordinate[1] += 0.1
+
+    return coordinate

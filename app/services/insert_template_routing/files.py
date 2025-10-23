@@ -50,7 +50,7 @@ def get_current_routing() -> dict[str, tuple[int, str, str]]:
         return latest_routing
 
 
-def copy_template(selected_file: str, assem_dir: str, new_name_template: str) -> None:
+def _copy_template(selected_file: str, assem_dir: str, new_name_template: str) -> None:
     old_file = BASE_DIR / selected_file
     new_file = Path(assem_dir) / new_name_template
 

@@ -1,13 +1,51 @@
 import re
-from itertools import zip_longest
+from itertools import chain
 
-from thefuzz import fuzz
+from rapidfuzz import fuzz, process
+
+from .excel_utils import get_cell
 
 
-def get_secondary_items(sp: list[tuple]) -> tuple[list[tuple], list[tuple]]:
-    last_sp: list[tuple] = []
-    secondary_items: list[tuple] = []
-    items: set[str] = {
+def get_matches(spec_ws, spec_model_ws):  # !!!!аннотация
+    spec: list[tuple[str]] = list(get_cell(spec_ws, min_col=1, max_col=4, min_row=3, values_only=True))
+    model_spec: list[tuple[str]] = list(get_cell(spec_model_ws, min_row=2, values_only=True))
+
+    model_spec, secondary_items = _split_secondary_items(model_spec)
+
+    exact_matches, spec, model_spec = _match_exact_by_article(spec, model_spec)
+
+    fuzzy_thresholds: tuple[int, ...] = (80, 60, 40)
+    fuzzy_matches: list[tuple] = []
+    for t in fuzzy_thresholds:
+        matches, spec, model_spec = _match_fuzzy_by_article(spec, model_spec, t)
+        fuzzy_matches.extend(matches)
+
+    last_thresholds: tuple[int, ...] = (70, 60, 50, 40, 30)
+    last_matches: list[tuple] = []
+    for t in last_thresholds:
+        matches, spec, model_spec = _match_items_by_description(spec, model_spec, t)
+        last_matches.extend(matches)
+
+    return (
+        (('-',),),
+        *exact_matches,
+        (('-',),),
+        *fuzzy_matches,
+        (('-',),),
+        *last_matches,
+        (('-',),),
+        spec,
+        (('-',),),
+        model_spec,
+        (('-',),),
+        secondary_items
+    )
+
+
+def _split_secondary_items(spec: list[tuple[str]]) -> tuple[list[tuple], list[tuple]]:
+    primary: list[tuple] = []
+    secondary: list[tuple] = []
+    keywords: set[str] = {
         'хомут',
         'рама',
         'труба',
@@ -18,136 +56,146 @@ def get_secondary_items(sp: list[tuple]) -> tuple[list[tuple], list[tuple]]:
         'тройник',
         'трубка',
     }
-    for value in sp:
-        for item in items:
-            if value[3].lower().startswith(item):
-                secondary_items.append((
-                    '',
-                    '',
-                    '',
-                    *value[:2],
-                    '',
-                    value[3]
-                ))
-                break
+    for row in spec:
+        name = str(row[3]).lower()
+        if any(name.startswith(k) for k in keywords):
+            secondary.append(row)
         else:
-            last_sp.append(value)
+            primary.append(row)
 
-    return last_sp, sorted(secondary_items, key=lambda x: x[6])
+    return primary, secondary
 
 
-def get_exact_matches(
-        values_sp: list[tuple],
-        values_sp_assem: list[tuple]
+def _match_exact_by_article(
+        spec: list[tuple],
+        model_spec: list[tuple]
 ) -> tuple[list[tuple], list[tuple], list[tuple]]:
-    values_sp_assem_map: dict[str: list] = {}
-    for i in values_sp_assem:
-        key = i[0]
-        values_sp_assem_map.setdefault(key, []).append(i)
+    """Точное совпадение по первому столбцу."""
+    model_spec_map: dict[str: list] = {}
+    for row in model_spec:
+        model_spec_map.setdefault(row[0], []).append(row)
 
     matches: list[tuple] = []
-    values_sp_rest: list[tuple] = []
+    spec_rest: list[tuple] = []
 
-    for sp1 in values_sp:
-        if not sp1[0]:
-            continue
+    for sp1 in spec:
         key = sp1[0]
-        if key in values_sp_assem_map and values_sp_assem_map[key]:
-            sp2 = values_sp_assem_map[key].pop(0)
+        if not key:
+            continue
+
+        rows = model_spec_map.get(key)
+        if rows:
+            sp2 = rows.pop(0)
             matches.append((
-                *sp1[:2],
-                sp1[1] - sp2[1],
-                *sp2[:2],
-                sp1[3],
-                sp2[3],
-                sp1[4]
+                (sp1[0], sp1[1], sp1[2], int(sp1[1]) - int(sp2[1]), sp1[3]),
+                (sp1[0], sp1[1], sp1[2], '', sp1[3]),
             ))
         else:
-            values_sp_rest.append(sp1)
+            spec_rest.append(sp1)
 
-    values_sp_assem_rest = [t for values in values_sp_assem_map.values() for t in values]
+    model_spec_rest = list(chain.from_iterable(model_spec_map.values()))
 
-    return matches, values_sp_rest, values_sp_assem_rest
-
-
-def get_fuzzy_matches(
-        values_sp: list[tuple],
-        values_sp_assem: list[tuple]
-) -> tuple[list[tuple], list[tuple], list[tuple]]:
-    matches: list[tuple] = []
-    values_sp_rest: list[tuple] = []
-    for sp1 in values_sp:
-        match = None
-        for sp2 in values_sp_assem:
-            score = fuzz.ratio(str(sp1[0]), str(sp2[0]))
-            if score >= 80:
-                matches.append((
-                    *sp1[:2],
-                    sp1[1] - sp2[1],
-                    *sp2[:2],
-                    sp1[3],
-                    sp2[3],
-                    sp1[4]
-                ))
-                match = sp2
-                break
-        if match:
-            values_sp_assem.remove(match)
-        else:
-            values_sp_rest.append(sp1)
-    return matches, values_sp_rest, values_sp_assem
+    return matches, spec_rest, model_spec_rest
 
 
-def normalize(text: str) -> str:
-    text = text.lower()
-    text = re.sub(r'[^\w\s]', ' ', text)
-    text = re.sub(r'\s+', ' ', text).strip()
-    return text
-
-
-def compare_strings(s1: str, s2: str, threshold: int) -> tuple[bool, int]:
-    score = fuzz.token_set_ratio(s1, s2)
-    return score >= threshold, score
-
-
-def match_items(
-        values_sp: list[tuple],
-        values_sp_assem: list[tuple],
+def _match_fuzzy_by_article(
+        spec: list[tuple],
+        model_spec: list[tuple],
         threshold: int
 ) -> tuple[list[tuple], list[tuple], list[tuple]]:
-    matches: list[tuple] = []
-    values_sp_rest: list[tuple] = []
-    values_sp_assem_rest = values_sp_assem.copy()
+    """Нечеткое совпадение по 1-му столбцу"""
+    if not spec or not model_spec:
+        return [], spec, model_spec
 
-    for sp1 in values_sp:
-        s1 = normalize(str(sp1[3]))
-        best_match = None
-        best_score = 0
+    candidates = [str(row[0]) for row in model_spec]
 
-        for sp2 in values_sp_assem_rest:
-            s2 = normalize(str(sp2[3]))
-            is_match, score = compare_strings(s1, s2, threshold)
-            if score > best_score:
-                best_match = (sp1, sp2)
-                best_score = score
+    matches: list[tuple[tuple, tuple]] = []
+    spec_rest: list[tuple] = []
+    used_indices: set[int] = set()
 
-        if best_match and best_score >= threshold:
-            matches.append((
-                *best_match[0][:2],
-                best_match[0][1] - best_match[1][1],
-                *best_match[1][:2],
-                best_match[0][3],
-                best_match[1][3],
-                best_match[0][4]
-            ))
-            values_sp_assem_rest.remove(best_match[1])
+    for sp1 in spec:
+        key = str(sp1[0])
+        if not key:
+            spec_rest.append(sp1)
+            continue
+        result = process.extractOne(  # type: ignore[arg-type]
+            key,
+            candidates,
+            scorer=fuzz.QRatio,
+            score_cutoff=threshold
+        )
+
+        if result:
+            matched_value, score, idx = result
+            if idx not in used_indices:
+                sp2 = model_spec[idx]
+                matches.append((
+                    (sp1[0], sp1[1], sp1[2], int(sp1[1]) - int(sp2[1]), sp1[3]),
+                    (sp1[0], sp1[1], sp1[2], '', sp1[3]),
+                ))
+                used_indices.add(idx)
+            else:
+                spec_rest.append(sp1)
         else:
-            values_sp_rest.append(sp1)
+            spec_rest.append(sp1)
 
-    return matches, values_sp_rest, values_sp_assem_rest
+    model_spec_rest = [
+        row for i, row in enumerate(model_spec)
+        if i not in used_indices
+    ]
+
+    return matches, spec_rest, model_spec_rest
 
 
-def zip_last(sp1: list[tuple], sp2: list[tuple]) -> list[tuple]:
-    sp1.sort(key=lambda x: x[3])
-    sp2.sort(key=lambda x: x[3])
-    return [(*a[:2], '', *b[:2], a[3], b[3], a[4]) for a, b in zip_longest(sp1, sp2, fillvalue=('', '', '', '', ''))]
+def _match_items_by_description(
+        spec: list[tuple],
+        model_spec: list[tuple],
+        threshold: int
+) -> tuple[list[tuple], list[tuple], list[tuple]]:
+    """Нечеткое совпадение по 4-му столбцу (описанию)."""
+    normalized_sp = [(sp, _normalize(str(sp[3]))) for sp in spec]
+    normalized_assem = [(sp, _normalize(str(sp[3]))) for sp in model_spec]
+
+    candidates = [desc for _, desc in normalized_assem]
+    index_map = {desc: sp for sp, desc in normalized_assem}
+
+    matches: list[tuple] = []
+    spec_rest: list[tuple] = []
+    used_indices: set[int] = set()
+
+    for sp1, s1 in normalized_sp:
+        if not s1.strip():
+            spec_rest.append(sp1)
+            continue
+
+        result = process.extractOne(  # type: ignore[arg-type]
+            s1,
+            candidates,
+            scorer=fuzz.token_set_ratio,
+            score_cutoff=threshold,
+        )
+
+        if result:
+            matched_str, score, idx = result
+            if idx not in used_indices:
+                sp2 = index_map[matched_str]
+                matches.append((
+                    (sp1[0], sp1[1], sp1[2], int(sp1[1]) - int(sp2[1]), sp1[3]),
+                    (sp1[0], sp1[1], sp1[2], '', sp1[3]),
+                ))
+                used_indices.add(idx)
+            else:
+                spec_rest.append(sp1)
+        else:
+            spec_rest.append(sp1)
+
+    model_spec_rest = [
+        t for i, (t, _) in enumerate(normalized_assem)
+        if i not in used_indices
+    ]
+
+    return matches, spec_rest, model_spec_rest
+
+
+def _normalize(text: str) -> str:
+    return re.sub(r'\s+', ' ', re.sub(r'[^\w\s]', ' ', text.lower())).strip()
