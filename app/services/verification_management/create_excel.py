@@ -25,8 +25,8 @@ def create_verification_excel(spec_dir: str, model_spec_dir: str):
 
     compare_wb.save(str(Path(spec_dir).parent / Path(spec_dir).stem) + ' сравнение.xlsx')
 
-# if __name__ == "__main__":
-#     create_verification_excel(
-#         r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902.xlsx',
-#         r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902_SW.xlsx'
-#     )
+if __name__ == "__main__":
+    create_verification_excel(
+        r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902.xlsx',
+        r'C:\Users\Вадим\Desktop\Тестирование\8902\КД\Проверка СП\СП_8902_SW.xlsx'
+    )
