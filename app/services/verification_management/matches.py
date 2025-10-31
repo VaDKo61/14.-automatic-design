@@ -3,46 +3,42 @@ from itertools import chain
 
 from rapidfuzz import fuzz, process
 
-from .excel_utils import get_cell
+from .excel_utils import _get_cell
 
 
-def get_matches(spec_ws, spec_model_ws):  # !!!!аннотация
-    spec: list[tuple[str]] = list(get_cell(spec_ws, min_col=1, max_col=4, min_row=3, values_only=True))
-    model_spec: list[tuple[str]] = list(get_cell(spec_model_ws, min_row=2, values_only=True))
+def get_matches(spec_ws, spec_model_ws) -> dict[str, list]:
+    final_spec: dict[str, list] = {
+        'spec': list(_get_cell(spec_ws, min_col=1, max_col=4, min_row=3, values_only=True)),
+        'model_spec': list(_get_cell(spec_model_ws, min_row=2, values_only=True)),
+        'fuzzy_matches': [],
+        'last_matches': [],
+    }
 
-    model_spec, secondary_items = _split_secondary_items(model_spec)
+    final_spec = final_spec | _split_secondary_items(final_spec['model_spec'])
 
-    exact_matches, spec, model_spec = _match_exact_by_article(spec, model_spec)
+    final_spec = final_spec | _match_exact_by_article(final_spec['spec'], final_spec['model_spec'])
 
-    fuzzy_thresholds: tuple[int, ...] = (80, 60, 40)
-    fuzzy_matches: list[tuple] = []
+    spec = final_spec['spec']
+    model_spec = final_spec['model_spec']
+    fuzzy_thresholds: tuple[int, ...] = (90, 80)
     for t in fuzzy_thresholds:
         matches, spec, model_spec = _match_fuzzy_by_article(spec, model_spec, t)
-        fuzzy_matches.extend(matches)
+        final_spec['fuzzy_matches'].extend(matches)
 
-    last_thresholds: tuple[int, ...] = (70, 60, 50, 40, 30)
-    last_matches: list[tuple] = []
+    last_thresholds: tuple[int, ...] = (80, 70, 60, 50, 40, 30)
     for t in last_thresholds:
         matches, spec, model_spec = _match_items_by_description(spec, model_spec, t)
-        last_matches.extend(matches)
+        final_spec['last_matches'].extend(matches)
 
-    return (
-        (('-',),),
-        *exact_matches,
-        (('-',),),
-        *fuzzy_matches,
-        (('-',),),
-        *last_matches,
-        (('-',),),
-        spec,
-        (('-',),),
-        model_spec,
-        (('-',),),
-        secondary_items
-    )
+    final_spec.update({
+        'spec': spec,
+        'model_spec': model_spec,
+    })
+
+    return final_spec
 
 
-def _split_secondary_items(spec: list[tuple[str]]) -> tuple[list[tuple], list[tuple]]:
+def _split_secondary_items(spec: list[tuple]) -> dict[str, list]:
     primary: list[tuple] = []
     secondary: list[tuple] = []
     keywords: set[str] = {
@@ -63,13 +59,16 @@ def _split_secondary_items(spec: list[tuple[str]]) -> tuple[list[tuple], list[tu
         else:
             primary.append(row)
 
-    return primary, secondary
+    return {
+        'model_spec': primary,
+        'secondary_items': secondary
+    }
 
 
 def _match_exact_by_article(
         spec: list[tuple],
         model_spec: list[tuple]
-) -> tuple[list[tuple], list[tuple], list[tuple]]:
+) -> dict[str, list]:
     """Точное совпадение по первому столбцу."""
     model_spec_map: dict[str: list] = {}
     for row in model_spec:
@@ -86,16 +85,17 @@ def _match_exact_by_article(
         rows = model_spec_map.get(key)
         if rows:
             sp2 = rows.pop(0)
-            matches.append((
-                (sp1[0], sp1[1], sp1[2], int(sp1[1]) - int(sp2[1]), sp1[3]),
-                (sp1[0], sp1[1], sp1[2], '', sp1[3]),
-            ))
+            matches.append(_add_compare_count(sp1, sp2))
         else:
             spec_rest.append(sp1)
 
     model_spec_rest = list(chain.from_iterable(model_spec_map.values()))
 
-    return matches, spec_rest, model_spec_rest
+    return {
+        'exact_matches': matches,
+        'spec': spec_rest,
+        'model_spec': model_spec_rest
+    }
 
 
 def _match_fuzzy_by_article(
@@ -128,11 +128,7 @@ def _match_fuzzy_by_article(
         if result:
             matched_value, score, idx = result
             if idx not in used_indices:
-                sp2 = model_spec[idx]
-                matches.append((
-                    (sp1[0], sp1[1], sp1[2], int(sp1[1]) - int(sp2[1]), sp1[3]),
-                    (sp1[0], sp1[1], sp1[2], '', sp1[3]),
-                ))
+                matches.append(_add_compare_count(sp1, model_spec[idx]))
                 used_indices.add(idx)
             else:
                 spec_rest.append(sp1)
@@ -178,11 +174,7 @@ def _match_items_by_description(
         if result:
             matched_str, score, idx = result
             if idx not in used_indices:
-                sp2 = index_map[matched_str]
-                matches.append((
-                    (sp1[0], sp1[1], sp1[2], int(sp1[1]) - int(sp2[1]), sp1[3]),
-                    (sp1[0], sp1[1], sp1[2], '', sp1[3]),
-                ))
+                matches.append(_add_compare_count(sp1, index_map[matched_str]))
                 used_indices.add(idx)
             else:
                 spec_rest.append(sp1)
@@ -195,6 +187,13 @@ def _match_items_by_description(
     ]
 
     return matches, spec_rest, model_spec_rest
+
+
+def _add_compare_count(sp1: tuple, sp2: tuple) -> tuple[tuple, tuple]:
+    return (
+        (sp1[0], sp1[1], int(sp1[1]) - int(sp2[1]), sp1[2], sp1[3]),
+        (sp2[0], sp2[1], None, sp2[2], sp2[3]),
+    )
 
 
 def _normalize(text: str) -> str:

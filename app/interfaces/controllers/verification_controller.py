@@ -1,6 +1,7 @@
 from services.verification_management import verification_spec
 
 from .base import BaseUIHandler
+from ..views.messages import show_info
 
 
 class VerificationAssemSPHandler(BaseUIHandler):
@@ -8,3 +9,4 @@ class VerificationAssemSPHandler(BaseUIHandler):
 
     def _execute(self):
         verification_spec()
+        show_info(self.main_window, 'Выполнено', 'Спецификация сравнения создана')
