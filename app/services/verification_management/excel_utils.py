@@ -132,7 +132,12 @@ def _add_borders_and_merge_empty(ws) -> None:
         for cell in (cell for row in _get_cell(ws) for cell in row):
             cell.border = border
         if row[4].value is None:
-            ws.merge_cells(start_row=row[0].row, start_column=1, end_row=row[0].row, end_column=5)
+            ws.merge_cells(
+                start_row=row[0].row,
+                start_column=1,
+                end_row=row[0].row,
+                end_column=5
+            )
 
 
 def _add_fill_last_items(ws, current_row: int, fill: str) -> None:

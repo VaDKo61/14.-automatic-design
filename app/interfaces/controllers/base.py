@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from interfaces.views.messages import show_warning, show_error
 from services.project_management import InvalidProjectNumberError, ProjectExistsError
-from services.sw_utils import SwError
+from services.sw_utils import SwError, SwTableError
 from services.sw_utils import SwTableError
 
 
@@ -24,7 +24,6 @@ class BaseUIHandler(ABC):
                 ProjectExistsError,
                 ValueError,
                 FileNotFoundError,
-                SwTableError,
         ) as e:
             show_warning(self.main_window, str(e))
         except Exception as e:

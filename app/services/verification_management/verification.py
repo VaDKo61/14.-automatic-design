@@ -31,8 +31,8 @@ def _get_spec_dir(dir_project: str, number_project: str) -> str:
             file
             for file in dir_sp.iterdir()
             if file.is_file()
-               and number_project in file.stem
-               and not file.stem.lower().endswith('сравнение')
+            and number_project in file.stem
+            and not file.stem.lower().endswith('сравнение')
         ),
         None,
     )

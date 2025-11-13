@@ -16,6 +16,7 @@ ACTION_ABOUT = 'О программе'
 BTN_CREATE_PROJECT = 'Создать новый проект'
 BTN_VERIFICATION_PROJECT = 'Проверить сборку с СП'
 BTN_PASTE_TEMPLATE_ROUTING = 'Вставить в сборку шаблон трубопровода'
+BTN_CREATE_DRAWING_PART = 'Создать чертеж детали'
 
 # Сообщения
 MSG_INPUT_WARNING_TITLE = 'Внимание'

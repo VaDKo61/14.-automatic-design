@@ -3,7 +3,7 @@ import traceback
 
 import win32com.client
 
-from .errors import SwAppError, SwModelError, SwAssemblyError
+from .errors import SwAppError, SwModelError, SwAssemblyError, SwDrawingError, SwPartError
 
 
 class SolidWorksHandler:
@@ -26,6 +26,14 @@ class SolidWorksHandler:
     def verify_assembly(self):
         if self.model.GetType != 2:
             raise SwAssemblyError
+
+    def verify_part(self):
+        if self.model.GetType != 1:
+            raise SwPartError
+
+    def verify_drawing(self):
+        if self.model.GetType != 3:
+            raise SwDrawingError
 
     def _connect(self):
         if not self._com_initialized:

@@ -18,5 +18,17 @@ class SwAssemblyError(SwError):
     """Активна не сборка"""
 
 
+class SwPartError(SwError):
+    """Активна не деталь"""
+
+
+class SwDrawingError(SwError):
+    """Активен не чертеж"""
+
+
 class SwTableError(SwError):
     """Спецификация не создана"""
+
+
+class SwCreateDrawingError(SwError):
+    """Чертеж не создан"""

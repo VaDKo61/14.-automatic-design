@@ -31,6 +31,9 @@ class MainWindow(QMainWindow):
         self.button_paste_template_routing = (
             self.buttons_panel.add_button(s.BTN_PASTE_TEMPLATE_ROUTING)
         )
+        self.button_create_drawing_part = (
+            self.buttons_panel.add_button(s.BTN_CREATE_DRAWING_PART)
+        )
 
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
